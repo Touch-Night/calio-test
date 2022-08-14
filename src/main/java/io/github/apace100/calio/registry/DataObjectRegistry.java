@@ -7,9 +7,7 @@ import io.github.apace100.calio.data.SerializableData;
 import io.github.apace100.calio.data.SerializableDataType;
 import io.github.apace100.calio.data.SerializableDataTypes;
 import io.github.apace100.calio.network.CalioNetworking;
-import io.github.apace100.calio.util.OrderedResourceListeners;
 import io.netty.buffer.Unpooled;
-import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.fabricmc.fabric.api.resource.IdentifiableResourceReloadListener;
 import net.minecraft.network.PacketByteBuf;
 import net.minecraft.resource.ResourceManager;
@@ -20,6 +18,7 @@ import net.minecraft.util.JsonHelper;
 import net.minecraft.util.profiler.Profiler;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.quiltmc.qsl.networking.api.ServerPlayNetworking;
 
 import java.util.*;
 import java.util.function.BiConsumer;

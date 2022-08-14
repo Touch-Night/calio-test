@@ -4,10 +4,10 @@ import net.fabricmc.fabric.api.resource.IdentifiableResourceReloadListener;
 import net.fabricmc.fabric.api.resource.ResourceManagerHelper;
 import net.minecraft.resource.ResourceType;
 import net.minecraft.util.Identifier;
+import org.quiltmc.qsl.resource.loader.api.ResourceLoader;
 
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Map;
 import java.util.Set;
 
 /**
@@ -17,72 +17,33 @@ import java.util.Set;
 @Deprecated
 public final class OrderedResourceListeners {
 
-    private static final Set<Identifier> finalizedRegistrations = new HashSet<>();
-    private static final HashMap<Identifier, Registration> registrations = new HashMap<>();
+	private static final Set<Identifier> finalizedRegistrations = new HashSet<>();
+	private static final HashMap<Identifier, Registration> registrations = new HashMap<>();
 
-    public static Registration register(IdentifiableResourceReloadListener resourceReloadListener) {
-        Registration registration = new Registration(resourceReloadListener);
-        return registration;
-    }
+	public static Registration register(IdentifiableResourceReloadListener resourceReloadListener) {
+		return new Registration(resourceReloadListener);
+	}
 
-    private static void completeRegistration(Registration registration) {
-        registration.afterSet.removeAll(finalizedRegistrations);
-        if(registration.afterSet.size() == 0) {
-            finalizeRegistration(registration);
-        } else {
-            registrations.put(registration.resourceReloadListener.getFabricId(), registration);
-        }
-    }
+	public static class Registration {
 
-    private static void finalizeRegistration(Registration registration) {
-        ResourceManagerHelper.get(ResourceType.SERVER_DATA).registerReloadListener(registration.resourceReloadListener);
-        Identifier id = registration.resourceReloadListener.getFabricId();
-        finalizedRegistrations.add(id);
-        registrations.remove(id);
-        Set<Identifier> finishedOnes = new HashSet<>();
-        for(Map.Entry<Identifier, Registration> registrationEntry : registrations.entrySet()) {
-            registrationEntry.getValue().afterSet.remove(id);
-            if(registrationEntry.getValue().afterSet.size() == 0) {
-                finishedOnes.add(registrationEntry.getKey());
-            }
-        }
-        for(Identifier finished : finishedOnes) {
-            finalizeRegistration(registrations.get(finished));
-        }
-    }
+		private final IdentifiableResourceReloadListener resourceReloadListener;
 
-    public static class Registration {
+		private Registration(IdentifiableResourceReloadListener resourceReloadListener) {
+			this.resourceReloadListener = resourceReloadListener;
+		}
 
-        private final IdentifiableResourceReloadListener resourceReloadListener;
-        private final Set<Identifier> afterSet = new HashSet<>();
-        private final Set<Identifier> beforeSet = new HashSet<>();
-        private boolean isCompleted;
+		public Registration after(Identifier identifier) {
+			ResourceLoader.get(ResourceType.SERVER_DATA).addReloaderOrdering(identifier, this.resourceReloadListener.getFabricId());
+			return this;
+		}
 
-        private Registration(IdentifiableResourceReloadListener resourceReloadListener) {
-            this.resourceReloadListener = resourceReloadListener;
-        }
+		public Registration before(Identifier identifier) {
+			ResourceLoader.get(ResourceType.SERVER_DATA).addReloaderOrdering(this.resourceReloadListener.getFabricId(), identifier);
+			return this;
+		}
 
-        public Registration after(Identifier identifier) {
-            if(isCompleted) {
-                throw new IllegalStateException(
-                    "Can't add a resource reload listener registration dependency after it was completed.");
-            }
-            afterSet.add(identifier);
-            return this;
-        }
-
-        public Registration before(Identifier identifier) {
-            if(isCompleted) {
-                throw new IllegalStateException(
-                    "Can't add a resource reload listener registration dependency after it was completed.");
-            }
-            beforeSet.add(identifier);
-            return this;
-        }
-
-        public void complete() {
-            completeRegistration(this);
-            isCompleted = true;
-        }
-    }
+		public void complete() {
+			ResourceManagerHelper.get(ResourceType.SERVER_DATA).registerReloadListener(this.resourceReloadListener);
+		}
+	}
 }

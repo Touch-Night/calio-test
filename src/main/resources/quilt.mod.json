@@ -1,0 +1,53 @@
+{
+  "schema_version": 1,
+  "quilt_loader": {
+    "group": "dev.lambdaurora",
+    "id": "calio",
+    "version": "${version}",
+    "metadata": {
+      "name": "Calio",
+      "description": "A simple library mod, mainly adds a serializable data system.",
+      "contributors": {
+        "Apace": "Author"
+      },
+      "contact": {
+        "homepage": "",
+        "sources": "https://github.com/apace100/calio"
+      },
+      "license": "MIT",
+      "icon": "assets/calio/icon.png"
+    },
+    "intermediate_mappings": "net.fabricmc:intermediary",
+    "entrypoints": {
+      "init": [
+        "io.github.apace100.calio.Calio",
+        "io.github.apace100.calio.resource.OrderedResourceListener"
+      ],
+      "client_init": [
+        "io.github.apace100.calio.CalioClient"
+      ]
+    },
+    "depends": [
+      {
+        "id": "quilt_loader",
+        "versions": ">=0.17.3"
+      },
+      "quilted_fabric_api",
+      {
+        "id": "minecraft",
+        "versions": "1.18.2"
+      },
+      {
+        "id": "java",
+        "versions": ">=17"
+      }
+    ]
+  },
+  "mixin": "calio.mixins.json",
+  "modmenu": {
+    "badges": [
+      "library"
+    ]
+  },
+  "access_widener": "calio.accesswidener"
+}
